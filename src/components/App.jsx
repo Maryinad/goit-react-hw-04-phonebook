@@ -3,6 +3,7 @@ import { PhoneBook } from './PhoneBook/PhoneBook.jsx';
 import { ContactList } from './ContactList/ContactList.jsx';
 import { Filter } from '../components/Filter/Filter.jsx';
 import { TitlePhone, TitleCont } from './App.styled';
+import { nanoid } from 'nanoid';
 
 export function App() {
   const getLocalData = () => {
@@ -20,8 +21,7 @@ export function App() {
   const [filterTerm, setFilterTerm] = useState('');
 
   useEffect(() => {
-    if (prevState.contacts !== contacts)
-      localStorage.setItem('contacts', JSON.stringify(contacts));
+    localStorage.setItem('contacts', JSON.stringify(contacts));
   }, [contacts]);
 
   // componentDidMount() {
@@ -46,8 +46,12 @@ export function App() {
       alert(`Contact ${newContact.name} is already exist`);
       return;
     }
+    const contact = {
+      ...newContact,
+      id: nanoid(),
+    };
 
-    setContacts([newContact, ...contacts]);
+    setContacts(prevContacts => [contact, ...prevContacts]);
   };
 
   const handleFilter = event => {
@@ -55,9 +59,7 @@ export function App() {
   };
 
   const deleteContact = contactId => {
-    setContacts(prevState =>
-      prevState.contacts.filter(contact => contact.id !== contactId)
-    );
+    setContacts(contacts.filter(contact => contact.id !== contactId));
   };
 
   const filteredContacts = contacts.filter(contact =>

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { nanoid } from 'nanoid';
 import {
   FormField,
   TitleName,
@@ -10,53 +9,43 @@ import {
   Btn,
 } from './PhoneBook.styled';
 
-export function PhoneBook() {
+export function PhoneBook({ onAddContact }) {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
 
-  // state = {
-  //   name: '',
-  //   number: '',
-  // };
-
   const handleChange = event => {
+    const { name, value } = event.target;
     switch (name) {
-      case name:
-        setName(event.target.value.trim());
+      case 'name':
+        setName(value.trim());
         break;
 
-      case number:
-        setNumber(event.target.value.trim());
+      case 'number':
+        setNumber(value.trim());
         break;
 
       default:
         break;
     }
     // const { name, value } = event.target; //делаем деструкторизацию
+    // if (name === 'name') {
+    //   setName(value);
+    // } else {
+    //   setNumber(value);
+    // }
     // this.setState({ [name]: value.trim() }); //обчисливаемые св-ва объекта, после нажатия на input, определяет name какой и подставляет, н-р name="price", то будет price: (то, что ввели, те наше value)
   };
 
   const handleSubmit = event => {
     event.preventDefault();
-    // const { name, number } = this.state;
-    const contact = {
-      name,
-      number,
-      id: nanoid(),
-    };
 
-    this.props.onAddContact(contact);
+    onAddContact({ name, number });
     reset();
   };
 
   const reset = () => {
     setName('');
     setNumber('');
-
-    // this.setState({
-    //   name: '',
-    //   number: '',
-    // });
   };
 
   return (
@@ -91,5 +80,4 @@ export function PhoneBook() {
 
 PhoneBook.propTypes = {
   onAddContact: PropTypes.func.isRequired,
-  contacts: PropTypes.array.isRequired,
 };
