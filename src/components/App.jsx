@@ -1,85 +1,76 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PhoneBook } from './PhoneBook/PhoneBook.jsx';
 import { ContactList } from './ContactList/ContactList.jsx';
 import { Filter } from '../components/Filter/Filter.jsx';
 import { TitlePhone, TitleCont } from './App.styled';
 
-const LOCAL_CONTACTS = 'contacts';
-
-export class App extends Component {
-  state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
-    filterTerm: '',
+export function App() {
+  const getLocalData = () => {
+    return (
+      JSON.parse(localStorage.getItem('contacts')) ?? [
+        { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+        { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+        { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+        { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+      ]
+    );
   };
 
-  componentDidMount() {
-    const contacts = localStorage.getItem(LOCAL_CONTACTS);
-    const parsedContacts = JSON.parse(contacts);
-    if (parsedContacts) {
-      this.setState({
-        contacts: parsedContacts,
-      });
-    }
-  }
+  const [contacts, setContacts] = useState(getLocalData);
+  const [filterTerm, setFilterTerm] = useState('');
 
-  componentDidUpdate(_, prevState) {
-    if (prevState.contacts !== this.state.contacts) {
-      const stringifiedContacts = JSON.stringify(this.state.contacts);
-      localStorage.setItem(LOCAL_CONTACTS, stringifiedContacts);
-    }
-  }
+  useEffect(() => {
+    if (prevState.contacts !== contacts)
+      localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
-  //обрабатывает то, что возвращает наша форма, дальше через props onAddContact(можем назвать как угодно), передали эту функцию
-  addContact = newContact => {
-    if (this.state.contacts.some(contact => contact.name === newContact.name)) {
+  // componentDidMount() {
+  //   const contacts = localStorage.getItem(LOCAL_CONTACTS);
+  //   const parsedContacts = JSON.parse(contacts);
+  //   if (parsedContacts) {
+  //     this.setState({
+  //       contacts: parsedContacts,
+  //     });
+  //   }
+  // }
+
+  // componentDidUpdate(_, prevState) {
+  //   if (prevState.contacts !== this.state.contacts) {
+  //     const stringifiedContacts = JSON.stringify(this.state.contacts);
+  //     localStorage.setItem(LOCAL_CONTACTS, stringifiedContacts);
+  //   }
+  // }
+
+  const addContact = newContact => {
+    if (contacts.some(contact => contact.name === newContact.name)) {
       alert(`Contact ${newContact.name} is already exist`);
       return;
     }
 
-    // this.setState({ contacts: [newContact, ...this.state.contacts] });
-    this.setState(prevState => ({
-      contacts: [newContact, ...prevState.contacts],
-    }));
-    // console.log(newContact);
+    setContacts([newContact, ...contacts]);
   };
 
-  handleFilter = event => {
-    this.setState({
-      filterTerm: event.target.value,
-    });
+  const handleFilter = event => {
+    setFilterTerm(event.target.value);
   };
 
-  deleteContact = contactId => {
-    // console.log(contactId);
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
-    }));
-  };
-
-  render() {
-    const filteredContacts = this.state.contacts.filter(contact =>
-      contact.name
-        .toLowerCase()
-        .trim()
-        .includes(this.state.filterTerm.toLowerCase())
+  const deleteContact = contactId => {
+    setContacts(prevState =>
+      prevState.contacts.filter(contact => contact.id !== contactId)
     );
-    //передаем пропсами
-    return (
-      <>
-        <TitlePhone>Phonebook</TitlePhone>
-        <PhoneBook onAddContact={this.addContact} title="Phonebook" />
-        <TitleCont>Contacts</TitleCont>
-        <Filter value={this.state.filter} onFilterChange={this.handleFilter} />
-        <ContactList
-          contacts={filteredContacts}
-          onDeleteBtn={this.deleteContact}
-        />
-      </>
-    );
-  }
+  };
+
+  const filteredContacts = contacts.filter(contact =>
+    contact.name.toLowerCase().trim().includes(filterTerm.toLowerCase())
+  );
+  //передаем пропсами
+  return (
+    <>
+      <TitlePhone>Phonebook</TitlePhone>
+      <PhoneBook onAddContact={addContact} title="Phonebook" />
+      <TitleCont>Contacts</TitleCont>
+      <Filter value={filterTerm} onFilterChange={handleFilter} />
+      <ContactList contacts={filteredContacts} onDeleteBtn={deleteContact} />
+    </>
+  );
 }
